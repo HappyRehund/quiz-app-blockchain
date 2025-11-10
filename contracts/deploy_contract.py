@@ -7,10 +7,10 @@ from dotenv import load_dotenv
 load_dotenv()
 
 # Configuration
-HTTP_PROVIDER = os.getenv("BLOCKCHAIN_RPC_URL", "http://localhost:8545")
-DEPLOYER_ADDRESS = os.getenv("DEPLOYER_ADDRESS")
-KEYSTORE_PATH = os.getenv("DEPLOYER_KEYSTORE_PATH")
-PASSWORD = os.getenv("DEPLOYER_PASSWORD")
+HTTP_PROVIDER = os.getenv("BLOCKCHAIN_RPC_URL", "http://localhost:8545") or "http://localhost:8545"
+DEPLOYER_ADDRESS = os.getenv("DEPLOYER_ADDRESS") or ""
+KEYSTORE_PATH = os.getenv("DEPLOYER_KEYSTORE_PATH") or ""
+PASSWORD = os.getenv("DEPLOYER_PASSWORD") or ""
 CHAIN_ID = int(os.getenv("BLOCKCHAIN_CHAIN_ID", "110261"))
 
 # Connect to blockchain
@@ -48,13 +48,13 @@ print("✅ Contract ABI and bytecode loaded")
 CertificateRegistry = w3.eth.contract(abi=contract_abi, bytecode=contract_bytecode)
 
 # Get nonce
-nonce = w3.eth.get_transaction_count(DEPLOYER_ADDRESS)
+nonce = w3.eth.get_transaction_count(Web3.to_checksum_address(DEPLOYER_ADDRESS))
 
 # Build transaction
 print("🔨 Building deployment transaction...")
 transaction = CertificateRegistry.constructor().build_transaction({
     "chainId": CHAIN_ID,
-    "from": DEPLOYER_ADDRESS,
+    "from": Web3.to_checksum_address(DEPLOYER_ADDRESS),
     "nonce": nonce,
     "gas": 3000000,
     "gasPrice": w3.eth.gas_price
@@ -73,11 +73,11 @@ print(f"📋 Transaction hash: {tx_hash.hex()}")
 print("⏳ Waiting for transaction confirmation...")
 tx_receipt = w3.eth.wait_for_transaction_receipt(tx_hash)
 
-if tx_receipt.status == 1:
+if tx_receipt["status"] == 1:
     print(f"✅ Contract deployed successfully!")
-    print(f"📍 Contract address: {tx_receipt.contractAddress}")
-    print(f"🔢 Block number: {tx_receipt.blockNumber}")
+    print(f"📍 Contract address: {tx_receipt['contractAddress']}")
+    print(f"🔢 Block number: {tx_receipt['blockNumber']}")
     print(f"\n⚠️  IMPORTANT: Copy this contract address to your .env file:")
-    print(f"CONTRACT_ADDRESS={tx_receipt.contractAddress}")
+    print(f"CONTRACT_ADDRESS={tx_receipt['contractAddress']}")
 else:
     print("❌ Contract deployment failed!")

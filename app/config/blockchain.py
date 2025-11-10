@@ -33,12 +33,11 @@ class BlockchainConfig:
                 abi = json.load(f)
             
             return self.w3.eth.contract(
-                address=self.contract_address,
+                address=Web3.to_checksum_address(self.contract_address),
                 abi=abi
             )
         except Exception as e:
             print(f"Error loading contract: {e}")
             return None
-
 
 blockchain_config = BlockchainConfig()
