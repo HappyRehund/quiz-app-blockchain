@@ -8,4 +8,14 @@ auth_router = APIRouter(prefix="/auth", tags=["Authentication"])
 
 @auth_router.post("/register")
 async def register(user_data: UserRegister, db=Depends()):
-    return None;
+    return await AuthController.register(user_data, db);
+
+@auth_router.post("/login")
+async def login(credentials: UserLogin, db=Depends()):
+    return await AuthController.login(credentials, db);
+
+@auth_router.get("/me")
+async def get_me(current_user=Depends(AuthController.get_current_user_from_token)):
+    return await AuthController.get_me(current_user);
+
+router.include_router(auth_router)
