@@ -71,6 +71,7 @@ def upgrade() -> None:
         sa.Column('chapters_completed', sa.Integer(), nullable=False),
         sa.Column('created_at', sa.DateTime(), nullable=True),
         sa.Column('updated_at', sa.DateTime(), nullable=True),
+        
         sa.ForeignKeyConstraint(['user_id'], ['users.id'], ),
         sa.ForeignKeyConstraint(['course_id'], ['courses.id'], ),
         sa.PrimaryKeyConstraint('id'),
