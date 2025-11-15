@@ -1,20 +1,26 @@
-from sqlalchemy import Column, Integer, String, DateTime
-from sqlalchemy.orm import relationship
+from sqlalchemy import String, DateTime
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 from datetime import datetime
+from typing import List, TYPE_CHECKING
 from app.db.session import Base
+
+if TYPE_CHECKING:
+    from app.models.user_progress import UserProgress
+    from app.models.quiz_answer import QuizAnswer
+    from app.models.certificate import Certificate
 
 
 class User(Base):
     __tablename__ = "users"
     
-    id = Column(Integer, primary_key=True, index=True)
-    username = Column(String(50), unique=True, nullable=False, index=True)
-    email = Column(String(100), unique=True, nullable=False, index=True)
-    password_hash = Column(String(255), nullable=False)
-    created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
-    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    id: Mapped[int] = mapped_column(primary_key=True, index=True)
+    username: Mapped[str] = mapped_column(String(50), unique=True, index=True)
+    email: Mapped[str] = mapped_column(String(100), unique=True, index=True)
+    password_hash: Mapped[str] = mapped_column(String(255))
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
+    updated_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
     
     # Relationships
-    progress = relationship("UserProgress", back_populates="user", cascade="all, delete-orphan")
-    quiz_answers = relationship("QuizAnswer", back_populates="user", cascade="all, delete-orphan")
-    certificates = relationship("Certificate", back_populates="user", cascade="all, delete-orphan")
+    progress: Mapped[List["UserProgress"]] = relationship(back_populates="user", cascade="all, delete-orphan")
+    quiz_answers: Mapped[List["QuizAnswer"]] = relationship(back_populates="user", cascade="all, delete-orphan")
+    certificates: Mapped[List["Certificate"]] = relationship(back_populates="user", cascade="all, delete-orphan")

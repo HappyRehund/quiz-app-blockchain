@@ -1,23 +1,28 @@
-from sqlalchemy import Column, Integer, ForeignKey, DateTime, UniqueConstraint
-from sqlalchemy.orm import relationship
+from sqlalchemy import ForeignKey, DateTime, UniqueConstraint
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 from datetime import datetime
+from typing import TYPE_CHECKING
 from app.db.session import Base
+
+if TYPE_CHECKING:
+    from app.models.user import User
+    from app.models.course import Course
 
 
 class UserProgress(Base):
     __tablename__ = "user_progress"
     
-    id = Column(Integer, primary_key=True, index=True)
-    user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
-    course_id = Column(Integer, ForeignKey("courses.id"), nullable=False)
-    chapters_completed = Column(Integer, default=0, nullable=False)
-    created_at = Column(DateTime, default=datetime.utcnow)
-    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    id: Mapped[int] = mapped_column(primary_key=True, index=True)
+    user_id: Mapped[int] = mapped_column(ForeignKey("users.id"))
+    course_id: Mapped[int] = mapped_column(ForeignKey("courses.id"))
+    chapters_completed: Mapped[int] = mapped_column(default=0)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
+    updated_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
     
     __table_args__ = (
         UniqueConstraint('user_id', 'course_id', name='unique_user_course'),
     )
     
     # Relationships
-    user = relationship("User", back_populates="progress")
-    course = relationship("Course", back_populates="progress")
+    user: Mapped["User"] = relationship(back_populates="progress")
+    course: Mapped["Course"] = relationship(back_populates="progress")

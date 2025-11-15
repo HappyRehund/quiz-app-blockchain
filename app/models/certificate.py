@@ -1,20 +1,26 @@
 from datetime import datetime
-from sqlalchemy import Column, Integer, String, ForeignKey, DateTime
-from sqlalchemy.orm import relationship
+from sqlalchemy import String, ForeignKey, DateTime
+from sqlalchemy.orm import Mapped, mapped_column, relationship
+from typing import Optional, TYPE_CHECKING
 from app.db.session import Base
+
+if TYPE_CHECKING:
+    from app.models.user import User
+    from app.models.course import Course
+
 
 class Certificate(Base):
     __tablename__ = "certificates"
 
-    id = Column(Integer, primary_key=True, index=True)
-    certificate_id = Column(String(100), unique=True, index=True, nullable=False)
-    user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
-    course_id = Column(Integer, ForeignKey("courses.id"), nullable=False)
-    chapters_completed = Column(Integer, nullable=False)
-    certificate_hash = Column(String(66), nullable=False)
-    tx_hash = Column(String(66), nullable=True)
-    block_number = Column(Integer, nullable=True)
-    created_at = Column(DateTime, default=datetime.utcnow)
+    id: Mapped[int] = mapped_column(primary_key=True, index=True)
+    certificate_id: Mapped[str] = mapped_column(String(100), unique=True, index=True)
+    user_id: Mapped[int] = mapped_column(ForeignKey("users.id"))
+    course_id: Mapped[int] = mapped_column(ForeignKey("courses.id"))
+    chapters_completed: Mapped[int]
+    certificate_hash: Mapped[str] = mapped_column(String(66))
+    tx_hash: Mapped[Optional[str]] = mapped_column(String(66), nullable=True)
+    block_number: Mapped[Optional[int]] = mapped_column(nullable=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
 
-    user = relationship("User", back_populates="certificates")
-    course = relationship("Course")
+    user: Mapped["User"] = relationship(back_populates="certificates")
+    course: Mapped["Course"] = relationship()
