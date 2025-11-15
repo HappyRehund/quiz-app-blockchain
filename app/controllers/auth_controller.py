@@ -11,7 +11,10 @@ security = HTTPBearer()
 
 class AuthController:
     @staticmethod
-    async def register(user_data: UserRegister, db: Session = Depends(get_db)) -> dict:
+    async def register(
+        user_data: UserRegister, 
+        db: Session = Depends(get_db)
+    ) -> dict:
         """Register user baru"""
         auth_service = AuthService(db)
         
@@ -29,7 +32,10 @@ class AuthController:
         }
     
     @staticmethod
-    async def login(credentials: UserLogin, db: Session = Depends(get_db)) -> dict:
+    async def login(
+        credentials: UserLogin,
+        db: Session = Depends(get_db)
+    ) -> dict:
         """Login user"""
         
         auth_service = AuthService(db)
@@ -75,7 +81,9 @@ class AuthController:
         return auth_service.get_current_user(user_id)
 
     @staticmethod
-    async def get_me(current_user: User = Depends(get_current_user_from_token)) -> dict:
+    async def get_me(
+        current_user: User = Depends(get_current_user_from_token)
+    ) -> dict:
         """Get current user profile"""
         return {
             "success": True,

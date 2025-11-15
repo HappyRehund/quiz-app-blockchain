@@ -4,6 +4,7 @@ from app.schemas.user_schema import UserRegister, UserLogin
 
 router = APIRouter(prefix="/api/v1")
 
+# Bagian AUTH
 auth_router = APIRouter(prefix="/auth", tags=["Authentication"])
 
 @auth_router.post("/register")
@@ -19,3 +20,10 @@ async def get_me(current_user=Depends(AuthController.get_current_user_from_token
     return await AuthController.get_me(current_user);
 
 router.include_router(auth_router)
+
+# Bagian COURSE
+course_router = APIRouter(prefix="/courses", tags=["Courses"])
+
+@course_router.get("")
+async def get_all_courses(current_user=Depends(), db=Depends()):
+    return None
