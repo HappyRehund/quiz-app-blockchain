@@ -1,4 +1,5 @@
 from web3 import Web3
+from web3.middleware.geth_poa import geth_poa_middleware
 from app.config.settings import settings
 import json
 
@@ -6,6 +7,10 @@ import json
 class BlockchainConfig:
     def __init__(self):
         self.w3 = Web3(Web3.HTTPProvider(settings.BLOCKCHAIN_RPC_URL))
+        
+        # IMPORTANT: Inject PoA middleware for Clique consensus
+        self.w3.middleware_onion.inject(geth_poa_middleware, layer=0)
+        
         self.chain_id = settings.BLOCKCHAIN_CHAIN_ID
         self.contract_address = settings.CONTRACT_ADDRESS
         self.deployer_address = settings.DEPLOYER_ADDRESS

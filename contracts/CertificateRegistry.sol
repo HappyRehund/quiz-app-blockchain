@@ -41,8 +41,7 @@ contract CertificateRegistry {
             return false;
         }
         
-        return keccak256(bytes(certificates[_certificateId].certificateHash)) == 
-               keccak256(bytes(_certificateHash));
+        return keccak256(bytes(certificates[_certificateId].certificateHash)) == keccak256(bytes(_certificateHash));
     }
     
     function getTimestamp(string memory _certificateId) public view returns (uint256) {
