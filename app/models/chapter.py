@@ -1,12 +1,8 @@
 from sqlalchemy import String, Text, ForeignKey, DateTime
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from datetime import datetime
-from typing import List, TYPE_CHECKING
+from typing import List
 from app.db.session import Base
-
-if TYPE_CHECKING:
-    from app.models.course import Course
-    from app.models.quiz_answer import QuizAnswer
 
 
 class Chapter(Base):
@@ -23,6 +19,6 @@ class Chapter(Base):
     created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
     updated_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
     
-    # Relationships
-    course: Mapped["Course"] = relationship(back_populates="chapters")
-    quiz_answers: Mapped[List["QuizAnswer"]] = relationship(back_populates="chapter", cascade="all, delete-orphan")
+    # Relationships - use string references
+    course: Mapped["Course"] = relationship("Course", back_populates="chapters") # type:ignore
+    quiz_answers: Mapped[List["QuizAnswer"]] = relationship("QuizAnswer", back_populates="chapter", cascade="all, delete-orphan") # type:ignore
