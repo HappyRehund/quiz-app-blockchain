@@ -1,5 +1,6 @@
 from fastapi import APIRouter, Depends
 from app.controllers.auth_controller import AuthController
+from app.controllers.course_controller import CourseController
 from app.schemas.user_schema import UserRegister, UserLogin
 
 router = APIRouter(prefix="/api/v1")
@@ -26,4 +27,13 @@ course_router = APIRouter(prefix="/courses", tags=["Courses"])
 
 @course_router.get("")
 async def get_all_courses(current_user=Depends(), db=Depends()):
-    return None
+    return await CourseController.get_all_courses(current_user, db)
+
+@course_router.get("/{course_id}")
+async def get_course_detail(course_id: int, current_user=Depends(), db=Depends()):
+    return await CourseController.get_course_detail(course_id, current_user, db)
+
+router.include_router(course_router)
+
+# Bagian CHAPTER
+
