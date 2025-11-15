@@ -24,6 +24,12 @@ class BlockchainService:
                 detail="Smart contract not initialized"
             )
         
+        if not self.account:
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail="Blockchain account not initialized"
+            )
+        
         try:
             # Build transaction
             nonce = self.w3.eth.get_transaction_count(self.account.address)
@@ -48,8 +54,8 @@ class BlockchainService:
             
             return {
                 "tx_hash": tx_hash.hex(),
-                "block_number": receipt.blockNumber,
-                "status": receipt.status
+                "block_number": receipt["blockNumber"],
+                "status": receipt["status"]
             }
         
         except Exception as e:

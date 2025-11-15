@@ -46,6 +46,11 @@ class CertificateService:
         
         # Get user info
         user = self.user_repo.get_user_by_id(user_id)
+        if not user:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="User not found"
+            )
         
         # Generate certificate data
         now = datetime.utcnow()
@@ -95,8 +100,11 @@ class CertificateService:
         result = []
         
         for cert in certificates:
-            user = self.user_repo.get_user_by_id(cert.user_id)
-            course = self.course_repo.get_course_by_id(cert.course_id)
+            user = self.user_repo.get_user_by_id(cert.user_id)  # type: ignore
+            course = self.course_repo.get_course_by_id(cert.course_id)  # type: ignore
+            
+            if not user or not course:
+                continue
             
             result.append({
                 "id": cert.id,
@@ -142,8 +150,16 @@ class CertificateService:
             }
         
         # Get full certificate data
-        user = self.user_repo.get_user_by_id(certificate.user_id)
-        course = self.course_repo.get_course_by_id(certificate.course_id)
+        user = self.user_repo.get_user_by_id(certificate.user_id)  # type: ignore
+        course = self.course_repo.get_course_by_id(certificate.course_id)  # type: ignore
+        
+        if not user or not course:
+            return {
+                "is_valid": False,
+                "certificate": None,
+                "blockchain_timestamp": None,
+                "message": "Certificate data incomplete"
+            }
         
         return {
             "is_valid": True,
