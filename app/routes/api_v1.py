@@ -2,7 +2,10 @@ from fastapi import APIRouter, Depends
 from app.controllers.auth_controller import AuthController
 from app.controllers.course_controller import CourseController
 from app.controllers.chapter_controller import ChapterController
+from app.controllers.quiz_controller import QuizController
 from app.schemas.user_schema import UserRegister, UserLogin
+from app.schemas.quiz_schema import QuizSubmit
+from app.schemas.certificate_schema import CertificateCreate, CertificateVerify
 
 router = APIRouter(prefix="/api/v1")
 
@@ -71,3 +74,16 @@ async def get_chapter_detail(
     return await ChapterController.get_chapter_detail(chapter_id, current_user, db)
 
 router.include_router(chapter_router)
+
+# Bagian QUIZ
+quiz_router = APIRouter(prefix="/quiz", tags=["Quiz"])
+
+@quiz_router.post("/submit")
+async def submit_quiz(
+    quiz_data: QuizSubmit,
+    current_user=Depends(),
+    db=Depends()
+):
+    return await QuizController.submit_quiz(quiz_data, current_user, db)
+
+router.include_router(quiz_router)
