@@ -1,16 +1,62 @@
 from sqlalchemy import create_engine
 from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import sessionmaker
+from sqlalchemy.orm import sessionmaker, Session
 from app.config.settings import settings
+from typing import Generator
+from contextlib import contextmanager
 
-engine = create_engine(settings.DATABASE_URL, pool_pre_ping=True)
-SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
+# Create engine
+engine = create_engine(
+    settings.DATABASE_URL, 
+    pool_pre_ping=True,
+    pool_size=10,
+    max_overflow=20
+)
+
+# Create SessionLocal class
+SessionLocal = sessionmaker(
+    autocommit=False,
+    autoflush=False,
+    bind=engine
+)
+
+# Create Base class
 Base = declarative_base()
 
 
-def get_db():
+def get_db() -> Generator[Session, None, None]:
+    """
+    Dependency untuk mendapatkan database session dengan auto transaction management.
+    Mirip dengan Spring @Transactional - akan auto commit jika sukses, rollback jika error.
+    """
     db = SessionLocal()
     try:
         yield db
+        db.commit()  # Auto-commit setelah request selesai tanpa error
+    except Exception:
+        db.rollback()  # Auto-rollback jika ada exception
+        raise
+    finally:
+        db.close()
+
+
+@contextmanager
+def get_db_context():
+    """
+    Context manager untuk transaction di luar request context.
+    Berguna untuk background tasks, scripts, atau testing.
+    
+    Usage:
+        with get_db_context() as db:
+            service = SomeService(db)
+            service.do_something()
+    """
+    db = SessionLocal()
+    try:
+        yield db
+        db.commit()
+    except Exception:
+        db.rollback()
+        raise
     finally:
         db.close()

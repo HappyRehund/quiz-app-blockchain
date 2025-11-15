@@ -1,17 +1,23 @@
 from sqlalchemy.orm import Session
 from app.helpers.password_helper import hash_password, verify_password
 from app.helpers.jwt_helper import create_access_token
+from app.helpers.transaction_helper import transactional, read_only
 from app.models.user import User
 from app.repositories.user_repository import UserRepository
 from fastapi import HTTPException, status
 from typing import Tuple
 
+
 class AuthService:
     def __init__(self, db: Session):
+        self.db = db  # Simpan db session untuk transaction management
         self.user_repo = UserRepository(db)
     
+    @transactional
     def register_user(self, username: str, email: str, password: str) -> User:
-        """Register a new user"""
+        """
+        Register a new user.
+        """
         
         # cek email
         if self.user_repo.get_user_by_email(email):
@@ -33,8 +39,11 @@ class AuthService:
         
         return created_user
     
+    @read_only
     def login_user(self, email: str, password: str) -> Tuple[str, User]:
-        """Login user dan mendapatkan token jwt"""
+        """
+        Login user dan mendapatkan token jwt.
+        """
         
         existing_user = self.user_repo.get_user_by_email(email)
         
@@ -54,8 +63,11 @@ class AuthService:
         
         return access_token, existing_user
     
+    @read_only
     def get_current_user(self, user_id: int) -> User:
-        """Get current authenticated user"""
+        """
+        Get current authenticated user.
+        """
         existing_user = self.user_repo.get_user_by_id(user_id)
         
         if not existing_user:
