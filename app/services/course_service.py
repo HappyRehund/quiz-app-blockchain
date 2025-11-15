@@ -2,6 +2,7 @@ from sqlalchemy.orm import Session
 from app.repositories.course_repository import CourseRepository
 from app.repositories.chapter_repository import ChapterRepository
 from app.repositories.progress_repository import ProgressRepository
+from app.helpers.transaction_helper import read_only
 from app.models.course import Course
 from fastapi import HTTPException, status
 from typing import List, Dict
@@ -9,10 +10,12 @@ from typing import List, Dict
 
 class CourseService:
     def __init__(self, db: Session):
+        self.db = db
         self.course_repo = CourseRepository(db)
         self.chapter_repo = ChapterRepository(db)
         self.progress_repo = ProgressRepository(db)
     
+    @read_only
     def get_all_courses(self, user_id: int) -> List[Dict]:
         """Get all courses with user progress"""
         courses = self.course_repo.get_all_courses()
@@ -33,6 +36,7 @@ class CourseService:
         
         return result
     
+    @read_only
     def get_course_detail(self, course_id: int, user_id: int) -> Dict:
         """Get course detail with user progress"""
         course = self.course_repo.get_course_by_id(course_id)

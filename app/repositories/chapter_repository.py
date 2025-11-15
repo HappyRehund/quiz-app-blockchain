@@ -28,7 +28,7 @@ class ChapterRepository:
             quiz_correct_answer=quiz_correct_answer
         )
         self.db.add(chapter)
-        self.db.commit()
+        self.db.flush()
         self.db.refresh(chapter)
         return chapter
     

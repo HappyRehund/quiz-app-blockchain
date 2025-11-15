@@ -11,7 +11,7 @@ class CourseRepository:
         """Create a new course"""
         course = Course(title=title, description=description)
         self.db.add(course)
-        self.db.commit()
+        self.db.flush()
         self.db.refresh(course)
         return course
     

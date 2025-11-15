@@ -2,6 +2,7 @@ from sqlalchemy.orm import Session
 from app.repositories.chapter_repository import ChapterRepository
 from app.repositories.quiz_repository import QuizRepository
 from app.repositories.course_repository import CourseRepository
+from app.helpers.transaction_helper import read_only
 from app.models.chapter import Chapter
 from fastapi import HTTPException, status
 from typing import List, Dict
@@ -10,10 +11,12 @@ import json
 
 class ChapterService:
     def __init__(self, db: Session):
+        self.db = db
         self.chapter_repo = ChapterRepository(db)
         self.quiz_repo = QuizRepository(db)
         self.course_repo = CourseRepository(db)
     
+    @read_only
     def get_course_chapters(self, course_id: int, user_id: int) -> List[Dict]:
         """Get all chapters for a course with completion status"""
         course = self.course_repo.get_course_by_id(course_id)
@@ -39,6 +42,7 @@ class ChapterService:
         
         return result
     
+    @read_only
     def get_chapter_detail(self, chapter_id: int, user_id: int) -> Dict:
         """Get chapter detail with content and quiz"""
         chapter = self.chapter_repo.get_chapter_by_id(chapter_id)

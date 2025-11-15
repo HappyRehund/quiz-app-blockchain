@@ -2,18 +2,23 @@ from sqlalchemy.orm import Session
 from app.repositories.chapter_repository import ChapterRepository
 from app.repositories.quiz_repository import QuizRepository
 from app.repositories.progress_repository import ProgressRepository
+from app.helpers.transaction_helper import transactional
 from fastapi import HTTPException, status
 from typing import Dict
 
 
 class QuizService:
     def __init__(self, db: Session):
+        self.db = db  # Simpan db session untuk transaction management
         self.chapter_repo = ChapterRepository(db)
         self.quiz_repo = QuizRepository(db)
         self.progress_repo = ProgressRepository(db)
     
+    @transactional
     def submit_quiz_answer(self, user_id: int, chapter_id: int, answer_index: int) -> Dict:
-        """Submit quiz answer and update progress"""
+        """
+        Submit quiz answer and update progress.
+        """
         chapter = self.chapter_repo.get_chapter_by_id(chapter_id)
         if not chapter:
             raise HTTPException(
@@ -24,7 +29,7 @@ class QuizService:
         # Check if answer is correct
         is_correct = (answer_index == chapter.quiz_correct_answer)
         
-        # Save answer
+        # Save answer (akan di-rollback jika error di bawah)
         self.quiz_repo.create_or_update_answer(
             user_id=user_id,
             chapter_id=chapter_id,
@@ -40,6 +45,7 @@ class QuizService:
             )
             chapters_completed = len(correct_answers)
             
+            # Jika update progress error, answer di atas akan di-rollback
             self.progress_repo.update_progress(
                 user_id=user_id,
                 course_id=chapter.course_id,

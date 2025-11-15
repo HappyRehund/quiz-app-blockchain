@@ -5,6 +5,7 @@ from app.repositories.user_repository import UserRepository
 from app.repositories.course_repository import CourseRepository
 from app.services.blockchain_service import blockchain_service
 from app.helpers.blockchain_helper import generate_certificate_id, generate_certificate_text, hash_certificate
+from app.helpers.transaction_helper import transactional, read_only
 from app.models.certificate import Certificate
 from fastapi import HTTPException, status
 from typing import List, Dict
@@ -13,13 +14,17 @@ from datetime import datetime
 
 class CertificateService:
     def __init__(self, db: Session):
+        self.db = db  # Simpan db session untuk transaction management
         self.cert_repo = CertificateRepository(db)
         self.progress_repo = ProgressRepository(db)
         self.user_repo = UserRepository(db)
         self.course_repo = CourseRepository(db)
     
+    @transactional
     def claim_certificate(self, user_id: int, course_id: int) -> Dict:
-        """Claim certificate for completing course"""
+        """
+        Claim certificate for completing course.
+        """
         # Check if course exists
         course = self.course_repo.get_course_by_id(course_id)
         if not course:
@@ -65,10 +70,10 @@ class CertificateService:
         )
         cert_hash = hash_certificate(cert_text)
         
-        # Store on blockchain
+        # Store on blockchain (jika gagal, exception akan di-raise dan DB rollback)
         blockchain_result = blockchain_service.store_certificate(cert_id, cert_hash)
         
-        # Save to database
+        # Save to database (jika gagal, rollback)
         certificate = self.cert_repo.create_certificate(
             certificate_id=cert_id,
             user_id=user_id,
@@ -94,8 +99,11 @@ class CertificateService:
             "created_at": certificate.created_at
         }
     
+    @read_only
     def get_user_certificates(self, user_id: int) -> List[Dict]:
-        """Get all certificates for a user"""
+        """
+        Get all certificates for a user.
+        """
         certificates = self.cert_repo.get_user_certificates(user_id)
         result = []
         
@@ -123,8 +131,11 @@ class CertificateService:
         
         return result
     
+    @read_only
     def verify_certificate(self, certificate_id: str) -> Dict:
-        """Verify certificate authenticity"""
+        """
+        Verify certificate authenticity.
+        """
         certificate = self.cert_repo.get_certificate_by_id(certificate_id)
         
         if not certificate:

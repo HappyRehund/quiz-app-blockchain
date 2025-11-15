@@ -28,7 +28,7 @@ class CertificateRepository:
             block_number=block_number
         )
         self.db.add(certificate)
-        self.db.commit()
+        self.db.flush()
         self.db.refresh(certificate)
         return certificate
     

@@ -31,7 +31,7 @@ class QuizRepository:
             )
             self.db.add(answer)
         
-        self.db.commit()
+        self.db.flush()
         self.db.refresh(answer)
         return answer
     

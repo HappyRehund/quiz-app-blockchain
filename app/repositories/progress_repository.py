@@ -20,7 +20,7 @@ class ProgressRepository:
                 chapters_completed=0
             )
             self.db.add(progress)
-            self.db.commit()
+            self.db.flush()
             self.db.refresh(progress)
         
         return progress
@@ -29,7 +29,7 @@ class ProgressRepository:
         """Update user progress"""
         progress = self.get_or_create_progress(user_id, course_id)
         progress.chapters_completed = chapters_completed
-        self.db.commit()
+        self.db.flush()
         self.db.refresh(progress)
         return progress
     
