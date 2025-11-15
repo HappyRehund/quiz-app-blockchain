@@ -4,8 +4,7 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(__file__)))
 
 from sqlalchemy.orm import Session
 from app.db.session import engine, SessionLocal
-from app.models.course import Course
-from app.models.chapter import Chapter
+from app.models import Course, Chapter
 import json
 
 def seed_courses():

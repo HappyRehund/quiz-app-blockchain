@@ -1,7 +1,12 @@
 from sqlalchemy import ForeignKey, DateTime, UniqueConstraint
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from datetime import datetime
+from typing import TYPE_CHECKING
 from app.db.session import Base
+
+if TYPE_CHECKING:
+    from app.models.user import User
+    from app.models.course import Course
 
 
 class UserProgress(Base):
@@ -18,6 +23,6 @@ class UserProgress(Base):
         UniqueConstraint('user_id', 'course_id', name='unique_user_course'),
     )
     
-    # Relationships - use string references
-    user: Mapped["User"] = relationship("User", back_populates="progress") # type:ignore
-    course: Mapped["Course"] = relationship("Course", back_populates="progress") # type:ignore
+    # Relationships
+    user: Mapped["User"] = relationship(back_populates="progress")
+    course: Mapped["Course"] = relationship(back_populates="progress")

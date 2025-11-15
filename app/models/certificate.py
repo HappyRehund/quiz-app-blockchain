@@ -1,8 +1,12 @@
 from datetime import datetime
 from sqlalchemy import String, ForeignKey, DateTime
 from sqlalchemy.orm import Mapped, mapped_column, relationship
-from typing import Optional
+from typing import Optional, TYPE_CHECKING
 from app.db.session import Base
+
+if TYPE_CHECKING:
+    from app.models.user import User
+    from app.models.course import Course
 
 
 class Certificate(Base):
@@ -18,6 +22,5 @@ class Certificate(Base):
     block_number: Mapped[Optional[int]] = mapped_column(nullable=True)
     created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
 
-    # Relationships - use string references
-    user: Mapped["User"] = relationship("User", back_populates="certificates") # type:ignore
-    course: Mapped["Course"] = relationship("Course") # type:ignore
+    user: Mapped["User"] = relationship(back_populates="certificates")
+    course: Mapped["Course"] = relationship()

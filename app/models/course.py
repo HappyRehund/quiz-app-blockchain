@@ -1,8 +1,12 @@
 from sqlalchemy import String, Text, DateTime
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from datetime import datetime
-from typing import List
+from typing import List, TYPE_CHECKING
 from app.db.session import Base
+
+if TYPE_CHECKING:
+    from app.models.chapter import Chapter
+    from app.models.user_progress import UserProgress
 
 
 class Course(Base):
@@ -14,6 +18,6 @@ class Course(Base):
     created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
     updated_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
     
-    # Relationships - use string references
-    chapters: Mapped[List["Chapter"]] = relationship("Chapter", back_populates="course", cascade="all, delete-orphan") #type:ignore
-    progress: Mapped[List["UserProgress"]] = relationship("UserProgress", back_populates="course", cascade="all, delete-orphan") #type:ignore
+    # Relationships
+    chapters: Mapped[List["Chapter"]] = relationship(back_populates="course", cascade="all, delete-orphan")
+    progress: Mapped[List["UserProgress"]] = relationship(back_populates="course", cascade="all, delete-orphan")

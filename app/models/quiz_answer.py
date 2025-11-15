@@ -1,7 +1,12 @@
 from sqlalchemy import ForeignKey, Boolean, DateTime, UniqueConstraint
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from datetime import datetime
+from typing import TYPE_CHECKING
 from app.db.session import Base
+
+if TYPE_CHECKING:
+    from app.models.user import User
+    from app.models.chapter import Chapter
 
 
 class QuizAnswer(Base):
@@ -18,6 +23,6 @@ class QuizAnswer(Base):
         UniqueConstraint('user_id', 'chapter_id', name='unique_user_chapter_answer'),
     )
     
-    # Relationships - use string references
-    user: Mapped["User"] = relationship("User", back_populates="quiz_answers") # type:ignore
-    chapter: Mapped["Chapter"] = relationship("Chapter", back_populates="quiz_answers") # type:ignore
+    # Relationships
+    user: Mapped["User"] = relationship(back_populates="quiz_answers")
+    chapter: Mapped["Chapter"] = relationship(back_populates="quiz_answers")
