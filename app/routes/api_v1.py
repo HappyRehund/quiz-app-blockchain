@@ -3,6 +3,7 @@ from app.controllers.auth_controller import AuthController
 from app.controllers.course_controller import CourseController
 from app.controllers.chapter_controller import ChapterController
 from app.controllers.quiz_controller import QuizController
+from app.controllers.certificate_controller import CertificateController
 from app.schemas.user_schema import UserRegister, UserLogin
 from app.schemas.quiz_schema import QuizSubmit
 from app.schemas.certificate_schema import CertificateCreate, CertificateVerify
@@ -87,3 +88,20 @@ async def submit_quiz(
     return await QuizController.submit_quiz(quiz_data, current_user, db)
 
 router.include_router(quiz_router)
+
+# Bagian CERTIFICATE
+certificate_router = APIRouter(prefix="/certificates", tags=["Certificates"])
+
+@certificate_router.post("/claim")
+async def claim_certificate(cert_data: CertificateCreate, current_user=Depends(), db=Depends()):
+    return await CertificateController.claim_certificate(cert_data, current_user, db)
+
+@certificate_router.get("/my-certificates")
+async def get_my_certificates(current_user=Depends(), db=Depends()):
+    return await CertificateController.get_my_certificates(current_user, db)
+
+@certificate_router.post("/verify")
+async def verify_certificate(verify_data: CertificateVerify, db=Depends()):
+    return await CertificateController.verify_certificate(verify_data, db)
+
+router.include_router(certificate_router)
