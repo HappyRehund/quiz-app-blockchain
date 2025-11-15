@@ -66,7 +66,7 @@ signed_txn = w3.eth.account.sign_transaction(transaction, private_key=private_ke
 
 # Send transaction
 print("📤 Sending deployment transaction...")
-tx_hash = w3.eth.send_raw_transaction(signed_txn.raw_transaction)
+tx_hash = w3.eth.send_raw_transaction(signed_txn.rawTransaction)
 print(f"📋 Transaction hash: {tx_hash.hex()}")
 
 # Wait for receipt
