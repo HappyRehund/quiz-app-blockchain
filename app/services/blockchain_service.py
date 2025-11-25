@@ -31,6 +31,17 @@ class BlockchainService:
             )
         
         try:
+            # Check if certificate already exists on blockchain
+            try:
+                cert_data = self.contract.functions.certificates(cert_id).call()
+                if cert_data and len(cert_data) >= 4 and cert_data[3]:  # exists flag
+                    raise HTTPException(
+                        status_code=status.HTTP_400_BAD_REQUEST,
+                        detail=f"Certificate {cert_id} already exists on blockchain"
+                    )
+            except Exception as e:
+                print(f"Error checking existing certificate: {e}")
+            
             # Build transaction
             nonce = self.w3.eth.get_transaction_count(self.account.address)
             
@@ -40,7 +51,7 @@ class BlockchainService:
             ).build_transaction({
                 'from': self.account.address,
                 'nonce': nonce,
-                'gas': 150000,
+                'gas': 300000,  # Increase gas limit
                 'gasPrice': self.w3.eth.gas_price,
                 'chainId': blockchain_config.chain_id
             })
@@ -49,8 +60,29 @@ class BlockchainService:
             signed_tx = self.account.sign_transaction(tx)
             tx_hash = self.w3.eth.send_raw_transaction(signed_tx.rawTransaction)
             
+            print(f"Transaction sent: {tx_hash.hex()}")
+            
             # Wait for transaction receipt
             receipt = self.w3.eth.wait_for_transaction_receipt(tx_hash, timeout=120)
+            
+            print(f"Transaction receipt: {receipt}")
+            
+            # Check if transaction was successful
+            if receipt['status'] != 1:
+                raise HTTPException(
+                    status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                    detail="Transaction failed on blockchain"
+                )
+            
+            # Verify certificate was actually stored
+            cert_data = self.contract.functions.certificates(cert_id).call()
+            print(f"Certificate after storage: {cert_data}")
+            
+            if not cert_data or len(cert_data) < 4 or not cert_data[3]:
+                raise HTTPException(
+                    status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                    detail="Certificate was not stored on blockchain properly"
+                )
             
             return {
                 "tx_hash": tx_hash.hex(),
@@ -58,6 +90,8 @@ class BlockchainService:
                 "status": receipt["status"]
             }
         
+        except HTTPException:
+            raise
         except Exception as e:
             print(f"Blockchain error: {e}")
             raise HTTPException(
@@ -99,6 +133,24 @@ class BlockchainService:
                 "is_valid": False,
                 "timestamp": None
             }
-
+    def get_certificate_hash(self, cert_id: str) -> Optional[str]:
+        """Get certificate hash from blockchain"""
+        if not self.w3.is_connected() or not self.contract:
+            return None
+        
+        try:
+            # Since 'certificates' mapping is public, Solidity creates a getter
+            # certificates(string) returns (string certificateId, string certificateHash, uint256 timestamp, bool exists)
+            cert_data = self.contract.functions.certificates(cert_id).call()
+            print(f"Certificate data from blockchain: {cert_data}")
+            
+            # cert_data is a tuple: (certificateId, certificateHash, timestamp, exists)
+            if cert_data and len(cert_data) >= 4 and cert_data[3]:  # Check exists flag
+                return cert_data[1]  # Return certificateHash
+            
+            return None
+        except Exception as e:
+            print(f"Error getting certificate from blockchain: {e}")
+            return None
 
 blockchain_service = BlockchainService()

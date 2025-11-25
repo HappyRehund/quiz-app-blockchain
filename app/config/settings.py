@@ -21,7 +21,7 @@ class Settings(BaseSettings):
     DEPLOYER_PASSWORD: str
     
     # CORS
-    CORS_ORIGINS: str = '["http://localhost:3000"]'
+    CORS_ORIGINS: str = '["http://localhost:5173"]'
     
     # App
     APP_NAME: str = "Blockchain Bootcamp API"

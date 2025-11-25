@@ -95,6 +95,25 @@
         "type": "string"
       }
     ],
+    "name": "getCertificateHash",
+    "outputs": [
+      {
+        "internalType": "string",
+        "name": "",
+        "type": "string"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "string",
+        "name": "_certificateId",
+        "type": "string"
+      }
+    ],
     "name": "getTimestamp",
     "outputs": [
       {

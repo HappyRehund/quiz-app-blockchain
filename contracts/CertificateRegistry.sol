@@ -62,4 +62,9 @@ contract CertificateRegistry {
         Certificate memory cert = certificates[_certificateId];
         return (cert.certificateId, cert.certificateHash, cert.timestamp);
     }
+
+    function getCertificateHash(string memory _certificateId) public view returns (string memory) {
+        require(certificates[_certificateId].exists, "Certificate does not exist");
+        return certificates[_certificateId].certificateHash;
+    }
 }

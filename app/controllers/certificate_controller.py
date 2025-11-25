@@ -2,6 +2,7 @@ from fastapi import Depends
 from sqlalchemy.orm import Session
 from app.db.session import get_db
 from app.services.certificate_service import CertificateService
+from app.services.blockchain_service import blockchain_service
 from app.schemas.certificate_schema import CertificateCreate, CertificateVerify
 from app.controllers.auth_controller import get_current_user
 from app.models.user import User
@@ -59,4 +60,19 @@ class CertificateController:
                 "certificate": result["certificate"],
                 "blockchain_timestamp": result["blockchain_timestamp"]
             }
+        }
+    
+    @staticmethod
+    async def debug_certificate(
+        cert_id: str,
+        db: Session = Depends(get_db)
+    ) -> dict:
+        cert_service = CertificateService(db)
+        certificate = cert_service.cert_repo.get_certificate_by_id(cert_id)
+        blockchain_hash = blockchain_service.get_certificate_hash(cert_id)
+        
+        return {
+            "db_hash": certificate.certificate_hash if certificate else None,
+            "blockchain_hash": blockchain_hash,
+            "match": certificate.certificate_hash == blockchain_hash if certificate else False
         }

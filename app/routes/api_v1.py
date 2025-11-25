@@ -116,4 +116,11 @@ async def verify_certificate(
 ):
     return await CertificateController.verify_certificate(verify_data, db)
 
+@certificate_router.get("/debug/{cert_id}")
+async def debug_certificate(
+    cert_id: str,
+    db: Session = Depends(get_db)
+):
+    return await CertificateController.debug_certificate(cert_id, db)
+
 router.include_router(certificate_router)
